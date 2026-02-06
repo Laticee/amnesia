@@ -29,6 +29,22 @@ Ensure you have [Rust](https://rustup.rs/) installed, then run:
 ```bash
 cargo install --path .
 ```
+## Configuration
+
+You can set default values for `ttl` and `idle` in a configuration file. A default one is created automatically on the first run.
+
+- **macOS**: `~/Library/Application Support/com.laticee.amnesia/config.toml`
+- **Linux**: `~/.config/amnesia/config.toml`
+
+Example `config.toml`:
+
+```toml
+# Time to live in minutes (self-destruct)
+# ttl = 10.0
+
+# Idle timeout in seconds
+idle = 300.0
+```
 
 ## Usage
 

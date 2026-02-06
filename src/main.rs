@@ -1,6 +1,8 @@
+mod config;
 mod mem_buffer;
 mod tui_app;
 
+use crate::config::Config;
 use crate::tui_app::Editor;
 use clap::Parser;
 use crossterm::{
@@ -32,15 +34,16 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    let config = Config::load();
 
-    // Determine idle timeout:
-    // 1. If --idle is provided, use it.
-    // 2. If --ttl is provided and --idle is NOT, disable idle.
-    // 3. Otherwise, default to 300s.
-    let idle_secs = match (args.idle, args.ttl) {
-        (Some(i), _) => Some(i),
-        (None, Some(_)) => None,
-        (None, None) => Some(300.0),
+    // Determine values, prioritizing CLI args over config, then hardcoded defaults.
+    let ttl = args.ttl.or(config.ttl);
+
+    let idle_secs = match (args.idle, ttl) {
+        (Some(i), _) => Some(i),                       // Explicit --idle
+        (None, _) if args.idle.is_some() => None, // This shouldn't happen with Option but for clarity
+        (None, Some(_)) if args.ttl.is_some() => None, // --ttl provided via CLI, no --idle provided via CLI
+        (None, _) => args.idle.or(config.idle),        // Use config or default
     };
 
     // 1. Disable core dumps to prevent RAM data from being written to disk on crash.
@@ -70,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut editor = Editor::new(idle_secs, args.ttl);
+    let mut editor = Editor::new(idle_secs, ttl);
 
     loop {
         // 1. Check for timeout BEFORE drawing or polling
