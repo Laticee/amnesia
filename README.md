@@ -20,7 +20,7 @@ You can now optionally encrypt your notes in RAM with a dynamic key derived from
 
 ### Instant Install (macOS/Linux)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/laticee/amnesia/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/laticee/amnesia/master/install.sh | bash
 ```
 
 ## Configuration
