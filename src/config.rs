@@ -12,7 +12,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            ttl: None,
+            ttl: Some(100.0)
             idle: Some(300.0),
             stealth_encryption: None,
         }
