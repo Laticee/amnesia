@@ -84,7 +84,7 @@ if [[ "$ENABLE_ENCRYPT" =~ ^[Yy]$ ]]; then
     CONFIG_FILE="${CONFIG_DIR}/config.toml"
     
     if [ ! -f "$CONFIG_FILE" ]; then
-        echo 'ttl = 0' > "$CONFIG_FILE"
+        echo 'ttl = 100' > "$CONFIG_FILE"
         echo 'idle = 300' >> "$CONFIG_FILE"
     fi
     
