@@ -6,6 +6,7 @@ use std::fs;
 pub struct Config {
     pub ttl: Option<f64>,
     pub idle: Option<f64>,
+    pub stealth_encryption: Option<bool>,
 }
 
 impl Default for Config {
@@ -13,6 +14,7 @@ impl Default for Config {
         Self {
             ttl: None,
             idle: Some(300.0),
+            stealth_encryption: None,
         }
     }
 }
@@ -37,10 +39,28 @@ impl Config {
             } else {
                 // Optionally create a default config file if it doesn't exist
                 let _ = fs::create_dir_all(config_dir);
-                let default_config = Self::default();
-                if let Ok(toml_str) = toml::to_string_pretty(&default_config) {
-                    let _ = fs::write(config_path, toml_str);
-                }
+                let config_toml = r#"# amnesia configuration file (v1.1)
+
+# [ttl]
+# Time to live in minutes.
+# After this time, the application will automatically wipe memory and exit.
+# Use 0.0 or comment out to disable.
+# ttl = 10.0
+
+# [idle]
+# Idle timeout in seconds.
+# The application will exit if no input is received for this duration.
+# Default is 300.0 (5 minutes).
+idle = 300.0
+
+# [stealth_encryption]
+# Enable stealth memory encryption (volatile-only).
+# Encrypts the RAM buffer with a key derived from system state and ASLR.
+# Note: Data is only accessible during the current session.
+# Default is false.
+stealth_encryption = false
+"#;
+                let _ = fs::write(config_path, config_toml);
             }
         }
         Self::default()

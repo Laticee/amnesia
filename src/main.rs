@@ -1,9 +1,6 @@
-mod config;
-mod mem_buffer;
-mod tui_app;
-
-use crate::config::Config;
-use crate::tui_app::Editor;
+use amnesia::config::Config;
+use amnesia::stealth;
+use amnesia::tui_app::Editor;
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -14,6 +11,7 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use std::io;
 use std::time::Duration;
+use zeroize::Zeroize;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -29,6 +27,10 @@ struct Args {
     /// Idle timeout in seconds
     #[arg(long)]
     idle: Option<f64>,
+
+    /// Enable stealth memory encryption (volatile-only)
+    #[arg(long)]
+    encrypt: bool,
 }
 
 #[tokio::main]
@@ -44,6 +46,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         (None, _) if args.idle.is_some() => None, // This shouldn't happen with Option but for clarity
         (None, Some(_)) if args.ttl.is_some() => None, // --ttl provided via CLI, no --idle provided via CLI
         (None, _) => args.idle.or(config.idle),        // Use config or default
+    };
+
+    let use_encryption = args.encrypt || config.stealth_encryption.unwrap_or(false);
+    let encryption_key = if use_encryption {
+        let key = stealth::derive_key();
+        Some(key)
+    } else {
+        None
     };
 
     // 1. Disable core dumps to prevent RAM data from being written to disk on crash.
@@ -73,7 +83,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut editor = Editor::new(idle_secs, ttl);
+    let mut editor = Editor::new(idle_secs, ttl, encryption_key);
+
+    // Zeroize the key copy in main after passing it to the editor
+    if let Some(mut key) = encryption_key {
+        key.zeroize();
+    }
 
     loop {
         // 1. Check for timeout BEFORE drawing or polling

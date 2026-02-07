@@ -1,6 +1,6 @@
 [package]
 name = "amnesia"
-version = "0.1.0"
+version = "1.1.0"
 edition = "2021"
 
 [dependencies]
@@ -13,6 +13,9 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 directories = "5.0"
 zeroize = "1.8.2"
+sha2 = "0.10.8"
+chacha20 = "0.9.1"
+getrandom = "0.2.14"
 
 [profile.release]
 opt-level = 3
