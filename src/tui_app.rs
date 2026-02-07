@@ -18,10 +18,14 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(idle_timeout_secs: Option<f64>, ttl_minutes: Option<f64>) -> Self {
+    pub fn new(
+        idle_timeout_secs: Option<f64>,
+        ttl_minutes: Option<f64>,
+        encryption_key: Option<[u8; 32]>,
+    ) -> Self {
         let now = Instant::now();
         Self {
-            storage: MemoryBuffer::new(1024 * 64), // 64KB pinned storage
+            storage: MemoryBuffer::new(1024 * 64, encryption_key), // 64KB pinned storage
             cursor_position: 0,
             scroll_offset: 0,
             last_input: now,
@@ -184,8 +188,14 @@ impl Editor {
         ));
 
         // Status bar
+        let stealth_tag = if self.storage.is_encrypted() {
+            "[STEALTH] "
+        } else {
+            ""
+        };
         let status = format!(
-            " Cursor: {}:{} | Idle: {}/{}s | TTL: {}",
+            " {}{}:{} | Idle: {}/{}s | TTL: {}",
+            stealth_tag,
             cur_line + 1,
             cur_col + 1,
             self.last_input.elapsed().as_secs(),

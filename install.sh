@@ -75,4 +75,26 @@ fi
 rm -rf "$tmp_dir"
 
 echo "Successfully installed amnesia!"
+
+# Post-install configuration
+read -p "Enable stealth memory encryption by default? (volatile-only, harder to dump from RAM) [y/N]: " ENABLE_ENCRYPT
+if [[ "$ENABLE_ENCRYPT" =~ ^[Yy]$ ]]; then
+    CONFIG_DIR="${HOME}/.config/amnesia"
+    mkdir -p "$CONFIG_DIR"
+    CONFIG_FILE="${CONFIG_DIR}/config.toml"
+    
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo 'ttl = 0' > "$CONFIG_FILE"
+        echo 'idle = 300' >> "$CONFIG_FILE"
+    fi
+    
+    # Check if stealth_encryption already exists
+    if grep -q "stealth_encryption" "$CONFIG_FILE"; then
+        sed -i.bak 's/stealth_encryption = .*/stealth_encryption = true/' "$CONFIG_FILE" && rm "${CONFIG_FILE}.bak"
+    else
+        echo 'stealth_encryption = true' >> "$CONFIG_FILE"
+    fi
+    echo "Stealth encryption enabled in ${CONFIG_FILE}"
+fi
+
 amnesia --version
