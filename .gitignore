@@ -1,9 +1,14 @@
-
+# Build
 /target
 Cargo.lock
-
 /releases/
+/dist/
 
+# Junk
+**/*.rs.bk
+*.swp
+*.bak
+*~
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -11,7 +16,7 @@ Icon
 .Spotlight-V100
 .Trashes
 
-**/*.rs.bk
-*.swp
-*.bak
-*~
+# MY Data 
+*.amnesio
+secret
+mydata

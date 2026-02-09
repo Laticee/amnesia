@@ -13,6 +13,9 @@ use std::io;
 use std::time::Duration;
 use zeroize::Zeroize;
 
+use crossterm::event::KeyModifiers;
+use std::path::PathBuf;
+
 #[derive(Parser, Debug)]
 #[command(
     author,
@@ -20,6 +23,11 @@ use zeroize::Zeroize;
     about = "amnesia: A volatile-only, privacy-focused CLI notepad."
 )]
 struct Args {
+    /// Optional file to load (read-only)
+    /// Optional file to load (read-only)
+    #[arg()]
+    file: Option<PathBuf>,
+
     /// Time to live in minutes (self-destruct)
     #[arg(long)]
     ttl: Option<f64>,
@@ -56,6 +64,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         None
     };
 
+    // Check if we are loading a file (Read-Only mode)
+    let read_only = args.file.is_some();
+    let mut initial_content = String::new();
+
+    if let Some(path) = &args.file {
+        if !path.exists() {
+            eprintln!("Error: File {:?} does not exist.", path);
+            std::process::exit(1);
+        }
+
+        println!("Loading encrypted file (Read-Only): {:?}", path);
+        let password = rpassword::prompt_password("Enter password: ")
+            .map_err(|e| format!("Failed to read password: {}", e))?;
+
+        initial_content = amnesia::persistence::load_encrypted(path, &password)
+            .map_err(|e| format!("Failed to load file: {}", e))?;
+
+        println!("File loaded successfully. Press Enter to start Amnesia.");
+        // Optional: wait for Enter so user sees success message?
+        // Or just proceed.
+        // Given we are about to clear screen, maybe a small pause or just proceed is fine.
+    }
+
     // 1. Disable core dumps to prevent RAM data from being written to disk on crash.
     unsafe {
         let limit = libc::rlimit {
@@ -83,7 +114,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut editor = Editor::new(idle_secs, ttl, encryption_key);
+    let mut editor = Editor::new(idle_secs, ttl, encryption_key, read_only);
+
+    if !initial_content.is_empty() {
+        editor.storage.update(&initial_content);
+        // Initial content might be sensitive, so we should zeroize it?
+        // String doesn't implement Zeroize automatically.
+        // But `editor.storage.update` takes &str.
+        // We should try to clear `initial_content` after use.
+        initial_content.zeroize();
+    }
 
     // Zeroize the key copy in main after passing it to the editor
     if let Some(mut key) = encryption_key {
@@ -101,7 +141,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if event::poll(Duration::from_millis(50))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    KeyCode::Esc => break,
+                    KeyCode::Esc => {
+                        if editor.input_mode != amnesia::tui_app::InputMode::Normal {
+                            editor.exit_popup();
+                        } else {
+                            break;
+                        }
+                    }
+                    KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                        editor.toggle_markdown();
+                    }
+                    KeyCode::Char('s') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                        editor.enter_save_mode();
+                    }
                     KeyCode::Enter => editor.handle_newline(),
                     KeyCode::Char(c) => editor.handle_input(c),
                     KeyCode::Backspace => editor.delete_backspace(),

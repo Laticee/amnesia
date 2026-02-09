@@ -12,7 +12,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            ttl: Some(100.0)
+            ttl: Some(100.0),
             idle: Some(300.0),
             stealth_encryption: None,
         }
@@ -44,8 +44,8 @@ impl Config {
 # [ttl]
 # Time to live in minutes.
 # After this time, the application will automatically wipe memory and exit.
-# Use 0.0 or comment out to disable.
-# ttl = 10.0
+# Use 0.0/none or comment out to disable.
+# ttl = 100.0
 
 # [idle]
 # Idle timeout in seconds.
