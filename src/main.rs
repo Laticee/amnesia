@@ -56,9 +56,9 @@ fn get_swap_snapshot() -> Option<SwapSnapshot> {
             }
         }
         let used_kb = total_kb?.saturating_sub(free_kb?);
-        return Some(SwapSnapshot {
+        Some(SwapSnapshot {
             bytes_used: used_kb.saturating_mul(1024),
-        });
+        })
     }
 
     #[cfg(target_os = "macos")]
@@ -72,15 +72,12 @@ fn get_swap_snapshot() -> Option<SwapSnapshot> {
             return None;
         }
         let s = String::from_utf8_lossy(&output.stdout);
-        let used_gb = s
-            .split_whitespace()
-            .skip_while(|t| *t != "used")
-            .nth(1)?;
+        let used_gb = s.split_whitespace().skip_while(|t| *t != "used").nth(1)?;
 
         let used_gb = used_gb.trim_end_matches('G');
         let used_gb: f64 = used_gb.parse().ok()?;
         let bytes_used = (used_gb * 1024.0 * 1024.0 * 1024.0) as u64;
-        return Some(SwapSnapshot { bytes_used });
+        Some(SwapSnapshot { bytes_used })
     }
 
     #[cfg(windows)]
@@ -111,9 +108,9 @@ fn get_swap_snapshot() -> Option<SwapSnapshot> {
         let physical_bytes = (info.PhysicalTotal as u64).saturating_mul(info.PageSize as u64);
 
         let pagefile_estimate = commit_bytes.saturating_sub(physical_bytes);
-        return Some(SwapSnapshot {
+        Some(SwapSnapshot {
             bytes_used: pagefile_estimate,
-        });
+        })
     }
 
     #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]

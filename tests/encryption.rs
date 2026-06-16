@@ -8,7 +8,7 @@ fn test_encryption_scrambles_data() {
     buffer.update(secret);
 
     // Verify that to_string recovers it
-    assert_eq!(buffer.to_string(), secret);
+    assert_eq!(buffer.expose_string(), secret);
 }
 
 #[test]
@@ -23,8 +23,8 @@ fn test_different_keys_different_ciphertext() {
 
     // In an integration test, we can't easily check the internal scrambling
     // without making fields public. But we can verify to_string works for both.
-    assert_eq!(buffer1.to_string(), secret);
-    assert_eq!(buffer2.to_string(), secret);
+    assert_eq!(buffer1.expose_string(), secret);
+    assert_eq!(buffer2.expose_string(), secret);
 }
 
 #[test]
@@ -32,5 +32,5 @@ fn test_no_encryption_works() {
     let mut buffer = MemoryBuffer::new(1024, None);
     let msg = "Normal message";
     buffer.update(msg);
-    assert_eq!(buffer.to_string(), msg);
+    assert_eq!(buffer.expose_string(), msg);
 }

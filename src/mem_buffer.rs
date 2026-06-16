@@ -1,8 +1,8 @@
 use chacha20::cipher::{KeyIvInit, StreamCipher};
 use chacha20::ChaCha20;
 use getrandom::getrandom;
-use zeroize::Zeroizing;
 use zeroize::Zeroize;
+use zeroize::Zeroizing;
 
 #[cfg(unix)]
 use libc::{c_void, mlock, munlock};
@@ -41,7 +41,7 @@ impl MemoryBuffer {
         self.key.is_some()
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn expose_string(&self) -> String {
         let mut buffer = self.data.clone();
 
         if let Some(ref key) = self.key {

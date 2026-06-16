@@ -74,7 +74,7 @@ fn capture_boot_time() -> u64 {
     0
 }
 
-fn creative_shuffle(data: &mut Vec<u8>) {
+fn creative_shuffle(data: &mut [u8]) {
     if data.len() < 2 {
         return;
     }

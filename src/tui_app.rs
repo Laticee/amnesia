@@ -40,7 +40,7 @@ impl Editor {
     }
 
     pub fn handle_input(&mut self, ch: char) {
-        let mut content = self.storage.to_string();
+        let mut content = self.storage.expose_string();
         let byte_idx = content
             .char_indices()
             .map(|(i, _)| i)
@@ -55,7 +55,7 @@ impl Editor {
 
     pub fn delete_backspace(&mut self) {
         if self.cursor_position > 0 {
-            let mut content = self.storage.to_string();
+            let mut content = self.storage.expose_string();
             self.cursor_position -= 1;
             if let Some((byte_idx, _)) = content.char_indices().nth(self.cursor_position) {
                 content.remove(byte_idx);
@@ -71,7 +71,7 @@ impl Editor {
     }
 
     pub fn move_cursor(&mut self, offset: isize) {
-        let mut content = self.storage.to_string();
+        let mut content = self.storage.expose_string();
         let char_count = content.chars().count();
         let new_pos = (self.cursor_position as isize + offset)
             .max(0)
@@ -82,7 +82,7 @@ impl Editor {
     }
 
     pub fn move_cursor_lineal(&mut self, direction: isize) {
-        let mut content = self.storage.to_string();
+        let mut content = self.storage.expose_string();
         let chars: Vec<char> = content.chars().collect();
         let mut cur_line = 0;
         let mut cur_col = 0;
@@ -111,8 +111,8 @@ impl Editor {
         let target_col = cur_col.min(lines[target_line].len());
 
         let mut new_idx = 0;
-        for i in 0..target_line {
-            new_idx += lines[i].len() + 1;
+        for line in lines.iter().take(target_line) {
+            new_idx += line.len() + 1;
         }
         new_idx += target_col;
 
@@ -146,7 +146,7 @@ impl Editor {
     }
 
     pub fn draw(&mut self, frame: &mut Frame) {
-        let mut content = self.storage.to_string();
+        let mut content = self.storage.expose_string();
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Min(1), Constraint::Length(1)])
@@ -180,10 +180,7 @@ impl Editor {
 
         let editor_block = Block::default()
             .borders(Borders::ALL)
-            .title(format!(
-                " amnesia - volatile-only notepad{}",
-                title_extra
-            ))
+            .title(format!(" amnesia - volatile-only notepad{}", title_extra))
             .border_style(Style::default().fg(Color::DarkGray));
 
         let widget = if self.show_markdown {
