@@ -64,8 +64,8 @@ fn capture_boot_time() -> u64 {
     {
         if let Ok(contents) = std::fs::read_to_string("/proc/stat") {
             for line in contents.lines() {
-                if line.starts_with("btime ") {
-                    return line[6..].trim().parse().unwrap_or(0);
+                if let Some(stripped) = line.strip_prefix("btime ") {
+                    return stripped.trim().parse().unwrap_or(0);
                 }
             }
         }
