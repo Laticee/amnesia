@@ -24,7 +24,7 @@ use windows_sys::Win32::System::ProcessStatus::{GetPerformanceInfo, PERFORMANCE_
 #[command(
     author,
     version,
-    about = "amnesia: A volatile-only, privacy-focused CLI notepad."
+    about = "amnesia: a volatile-only, privacy-focused cli notepad."
 )]
 struct Args {
     #[arg(long)]
@@ -242,6 +242,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal.show_cursor()?;
 
-    println!("\r\nAmnesia: Memory wiped. Goodbye.");
+    println!("\r\namnesia: memory wiped. goodbye.");
     Ok(())
 }

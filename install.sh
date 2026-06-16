@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-REPO="laticee/amnesia"
+REPO="washedshes/amnesia"
 BINARY_NAME="amnesia"
 INSTALL_DIR="/usr/local/bin"
 

@@ -21,7 +21,7 @@ impl Default for Config {
 
 impl Config {
     pub fn load() -> Self {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "laticee", "amnesia") {
+        if let Some(proj_dirs) = ProjectDirs::from("com", "washedshes", "amnesia") {
             let config_dir = proj_dirs.config_dir();
             let config_path = config_dir.join("config.toml");
 
