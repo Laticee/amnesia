@@ -36,31 +36,6 @@ impl Config {
                         );
                     }
                 }
-            } else {
-                // Optionally create a default config file if it doesn't exist
-                let _ = fs::create_dir_all(config_dir);
-                let config_toml = r#"# amnesia configuration file (v1.1)
-
-# [ttl]
-# Time to live in minutes.
-# After this time, the application will automatically wipe memory and exit.
-# Use 0.0/none or comment out to disable.
-# ttl = 100.0
-
-# [idle]
-# Idle timeout in seconds.
-# The application will exit if no input is received for this duration.
-# Default is 300.0 (5 minutes).
-idle = 300.0
-
-# [stealth_encryption]
-# Enable stealth memory encryption (volatile-only).
-# Encrypts the RAM buffer with a key derived from system state and ASLR.
-# Note: Data is only accessible during the current session.
-# Default is false.
-stealth_encryption = false
-"#;
-                let _ = fs::write(config_path, config_toml);
             }
         }
         Self::default()
