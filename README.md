@@ -44,17 +44,20 @@ if you have rust:
 cargo install --path .
 ```
 
-or just use the script:
+no cloning needed — just paste one of these into your terminal:
+
+**linux / macOS** (bash):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/once2027/amnesia/master/install.sh | bash
 ```
 
-on **windows** (powershell):
+**windows** (from PowerShell, no spawn needed):
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest https://raw.githubusercontent.com/once2027/amnesia/master/install.ps1 -OutFile install.ps1; .\install.ps1"
+irm https://raw.githubusercontent.com/once2027/amnesia/master/install.ps1 | iex
 ```
+(from cmd.exe, use: `powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/once2027/amnesia/master/install.ps1 | iex"`)
 
-or grab the `amnesia-windows-x86_64.zip` from the [releases](https://github.com/once2027/amnesia/releases) page and unzip it anywhere.
+the installer detects your OS/arch, verifies the release checksum, and puts `amnesia` on your PATH.
 
 ## config
 

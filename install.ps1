@@ -21,6 +21,23 @@ New-Item -ItemType Directory -Path $tmpDir | Out-Null
 try {
     Write-Host "Downloading $AssetName..."
     Invoke-WebRequest -Uri $DownloadUrl -OutFile (Join-Path $tmpDir $AssetName)
+
+    $ChecksumLine = $null
+    try {
+        $Sums = (Invoke-WebRequest -Uri "https://github.com/$Repo/releases/download/$Tag/SHA256SUMS" -UseBasicParsing).Content
+        $ChecksumLine = ($Sums -split "`r?`n" | Where-Object { $_ -match ("[ /]" + [regex]::Escape($AssetName) + "$") }) | Select-Object -First 1
+    } catch {
+        Write-Warning "Skipping checksum verification (no SHA256SUMS in release)."
+    }
+    if ($ChecksumLine) {
+        $Expected = (($ChecksumLine -split "\s+")[0]).ToLower()
+        $Actual = (Get-FileHash -Algorithm SHA256 -Path (Join-Path $tmpDir $AssetName)).Hash.ToLower()
+        if ($Expected -ne $Actual) {
+            throw "Checksum mismatch for $AssetName"
+        }
+        Write-Host "Checksum verified."
+    }
+
     Expand-Archive -Path (Join-Path $tmpDir $AssetName) -DestinationPath $tmpDir -Force
 
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
