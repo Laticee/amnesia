@@ -1,4 +1,4 @@
-# amnesia (v1.0)
+# amnesia (v1.1)
 
 hey! `amnesia` is a tiny TUI notepad i built because i wanted a place to type stuff that **never** touches my hard drive. it keeps everything in locked RAM and wipes it the second you close it.
 
