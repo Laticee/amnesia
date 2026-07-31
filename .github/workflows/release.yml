@@ -14,15 +14,23 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             suffix: linux-x86_64
+            package: tar.gz
           - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
+            target: aarch64-unknown-linux-gnu
             suffix: linux-arm64
+            package: tar.gz
           - os: macos-latest
             target: x86_64-apple-darwin
             suffix: macos-x86_64
+            package: tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
             suffix: macos-arm64
+            package: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            suffix: windows-x86_64
+            package: zip
 
     runs-on: ${{ matrix.os }}
 
@@ -33,37 +41,44 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools
-          if [ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu
-          fi
+          sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
 
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
       - name: Build
+        shell: bash
         run: |
-          if [ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]; then
-            export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc
+          if [ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]; then
+            export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
           fi
           cargo build --release --target ${{ matrix.target }}
 
-      - name: Package
+      - name: Package (tar.gz)
+        if: matrix.package == 'tar.gz'
+        shell: bash
         run: |
           cd target/${{ matrix.target }}/release
           tar -czf ../../../amnesia-${{ matrix.suffix }}.tar.gz amnesia
           cd ../../../
 
+      - name: Package (zip)
+        if: matrix.package == 'zip'
+        shell: powershell
+        run: Compress-Archive -Path "target/${{ matrix.target }}/release/amnesia.exe" -DestinationPath "amnesia-${{ matrix.suffix }}.zip"
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: amnesia-${{ matrix.suffix }}
-          path: amnesia-${{ matrix.suffix }}.tar.gz
+          path: amnesia-${{ matrix.suffix }}.${{ matrix.package }}
 
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -72,6 +87,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*.tar.gz
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

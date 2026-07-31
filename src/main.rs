@@ -15,6 +15,8 @@ use std::time::Duration;
 use zeroize::Zeroize;
 
 use crossterm::event::KeyModifiers;
+
+#[cfg(target_os = "macos")]
 use std::process::Command;
 
 #[cfg(windows)]

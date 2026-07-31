@@ -19,7 +19,7 @@ getrandom = "0.2.14"
 is-terminal = "0.4.15"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59.0", features = ["Win32_System_Memory"] }
+windows-sys = { version = "0.59.0", features = ["Win32_System_Memory", "Win32_System_ProcessStatus"] }
 
 [profile.release]
 opt-level = 3

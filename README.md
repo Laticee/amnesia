@@ -46,8 +46,15 @@ cargo install --path .
 
 or just use the script:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/washedshes/amnesia/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/once2027/amnesia/master/install.sh | bash
 ```
+
+on **windows** (powershell):
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest https://raw.githubusercontent.com/once2027/amnesia/master/install.ps1 -OutFile install.ps1; .\install.ps1"
+```
+
+or grab the `amnesia-windows-x86_64.zip` from the [releases](https://github.com/once2027/amnesia/releases) page and unzip it anywhere.
 
 ## config
 
@@ -55,6 +62,7 @@ by default, `amnesia` won't touch your disk. if you *want* to save settings like
 
 - **macos**: `~/library/application support/washedshes/amnesia/config.toml`
 - **linux**: `~/.config/amnesia/config.toml`
+- **windows**: `%appdata%\washedshes\amnesia\config.toml`
 
 ```toml
 idle = 300.0
